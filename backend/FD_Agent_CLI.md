@@ -57,6 +57,34 @@ The **FD Agent System** is an AI-powered tool designed to:
 - Surface missing links: unregistered injectables, unused blocs, orphaned routes, or dead widgets.
 - Generate test skeletons per layer (widget, bloc, usecase, repository) with placeholders for assertions and fixtures.
 
+### Enterprise Roadmap (Next-Level Capabilities)
+- **Docs/APIs ingestion**: Parse BRD/CR (PDF/DOCX) and API Excel into structured requirements/contracts.
+- **Feature graph + impact**: Maintain graph across Flutter/Python; auto scope changes and regressions.
+- **Planning engine**: Tasks with dependencies, estimates, AC, risks; export to Jira/Trello.
+- **Test automation**: Generate test skeletons per layer; enforce `flutter test`, `dart analyze`, `pytest` in CI.
+- **Compliance/security**: RBI/PII checks, rate limits, audit logs, input validation, dependency scanning.
+- **Telemetry**: Trace agent runs; detect drift between BRD/API and code; surface missing/mismatched contracts.
+
+### Requirement & API Schema (for parsers)
+- Requirement: `id`, `title`, `description`, `priority`, `acceptance_criteria`, `feature_area`, `risk`, `compliance_tags` (e.g., PII/RBI), `dependencies`.
+- API: `service`, `path`, `method`, `request_schema`, `response_schema`, `auth`, `rate_limit`, `errors`, `version`, `owner`, `tests`.
+
+### Feature Graph Model (cross-stack)
+- Nodes: `widget`, `bloc/cubit`, `usecase`, `repository`, `data_source`, `endpoint`, `validator`, `model`, `route`, `di_binding`, `test`.
+- Edges: `uses`, `provides`, `calls`, `validates`, `navigates`, `injects`, `tested_by`.
+- Uses: impact analysis, regression selection, missing-link detection (e.g., route without widget, DI without binding).
+
+### Task Template (per change)
+- **Frontend**: screens/widgets, bloc wiring, routes, theme/assets, localization, DI registrations.
+- **Backend**: endpoints, models/validators, services/repos, DB/transactions, auth/rate limits, logging/audit.
+- **Tests**: widget/bloc/usecase/repo/API; fixtures/mocks; golden/regression where needed.
+- **Compliance/Risk**: PII handling, limits, audit, error handling, fallback/rollback.
+- **Docs**: changelog/ADR/update BRD traceability.
+
+### CI / Quality Gates
+- `dart analyze`, `flutter test`, `pytest -q`, formatters.
+- Block merges if coverage/regression suites fail; run critical-path smoke (auth/payments/kyc/navigation).
+
 ### Safe Implementation Workflow (Flutter)
 1) **Plan diff-first**: derive impact (widgets ↔ blocs ↔ usecases ↔ repositories ↔ data sources ↔ endpoints). Prefer additive changes; avoid rewiring unless required.
 2) **Guard rails**: keep existing routes and DI registrations intact; introduce new feature flags or screen entries instead of replacing flows.
