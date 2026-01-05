@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+.venv/
+backend/venv/
+
+# FastAPI / data
+backend/chroma_db/
+backend/uploads/
+
+# Flutter / Dart
+**/.dart_tool/
+**/.packages
+**/build/
+**/coverage/
+**/.flutter-plugins*
+**/.metadata
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Reports
+htmlcov/
+coverage/
+coverage.lcov
+
+# Logs
+*.log
