@@ -11,6 +11,7 @@ from agents.memory_agent import MemoryAgent
 from agents.analyzer_agent import AnalyzerAgent
 from agents.cr_handler_agent import CRHandlerAgent
 from ingestion import parser as ingestion_parser
+from agents.gap_reporter import compute_gap_report
 
 class AgentOrchestrator:
     """Main orchestrator that coordinates all agents"""
@@ -70,6 +71,57 @@ class AgentOrchestrator:
         
         print(f"Analysis complete: {analysis_summary}")
         return analysis_summary
+
+    async def build_feature_graph(self, project_path: str) -> Dict[str, Any]:
+        """Build and persist the Flutter/Python feature graph (additive, read-only to code)."""
+        await self.initialize()
+
+        # Reuse analyzer agent to get a fresh snapshot
+        analysis = await self.analyzer_agent.analyze_project_full(project_path)
+
+        # Persist into structured store/vector store (widgets/blocs/models/endpoints)
+        await self.memory_agent.store_code_analysis(analysis, project_path)
+
+        return {
+            "flutter": {
+                "widgets": len(analysis.get("flutter", {}).get("widgets", [])),
+                "blocs": len(analysis.get("flutter", {}).get("blocs", [])),
+                "api_calls": len(analysis.get("flutter", {}).get("api_calls", [])),
+                "routes": len(analysis.get("flutter", {}).get("routes", [])),
+            },
+            "python": {
+                "endpoints": len(analysis.get("python", {}).get("endpoints", [])),
+                "models": len(analysis.get("python", {}).get("models", [])),
+                "services": len(analysis.get("python", {}).get("services", [])),
+            },
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    async def generate_gap_report(self, project_path: str) -> Dict[str, Any]:
+        """Generate requirement/API gap report without modifying code (read-only)."""
+        await self.initialize()
+
+        # Fresh analysis for Flutter API calls to compare against contracts
+        flutter_results = await self.analyzer_agent._analyze_flutter_code(project_path)  # type: ignore
+        python_results = await self.analyzer_agent._analyze_python_code(project_path)  # type: ignore
+
+        # Contracts stored from ingestion
+        api_contracts = await self.structured_store.get_entities_by_type("api_contract")
+
+        # Backend endpoints from analysis
+        backend_endpoints = python_results.get("endpoints", [])
+
+        # Flutter API calls from analysis
+        flutter_calls = flutter_results.get("api_calls", []) if isinstance(flutter_results, dict) else []
+
+        gaps = compute_gap_report(
+            api_contracts=api_contracts,
+            backend_endpoints=backend_endpoints,
+            flutter_calls=flutter_calls,
+        )
+
+        gaps["timestamp"] = datetime.now().isoformat()
+        return gaps
 
     async def ingest_brd_documents(self, paths: List[str], feature_area: str = "unspecified") -> Dict[str, Any]:
         """Ingest BRD/CR documents (DOCX/PDF/TXT) into memory."""
