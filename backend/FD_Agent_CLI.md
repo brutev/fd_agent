@@ -65,6 +65,20 @@ The **FD Agent System** is an AI-powered tool designed to:
 - **Compliance/security**: RBI/PII checks, rate limits, audit logs, input validation, dependency scanning.
 - **Telemetry**: Trace agent runs; detect drift between BRD/API and code; surface missing/mismatched contracts.
 
+### Next Implementation Steps (to reach higher confidence)
+1) **BRD/API ingestion**: Add parsers for PDF/DOCX and Excel → populate the requirement/API schema.
+2) **Feature graph builder**: Construct cross-stack graph (Flutter/Python) and expose impact/regression queries.
+3) **Route/DI deep scan**: Parse nested navigation stacks and DI registrations; flag missing bindings/routes.
+4) **Test skeleton generator**: Emit templates for widget/bloc/usecase/repo/API tests with fixtures/mocks.
+5) **CI gates**: Wire `dart analyze`, `flutter test`, `pytest`, and coverage thresholds; block merges on failures.
+6) **Compliance hooks**: Add checks for PII/RBI, rate limits, auth, audit logging on touched endpoints/flows.
+7) **Drift detector**: Compare BRD/API contracts vs. code; alert on missing/mismatched fields or routes.
+
+### New: BRD/API Ingestion Assets
+- Schemas: `backend/ingestion/requirement_schema.json`, `backend/ingestion/api_schema.json`.
+- Parsers: `backend/ingestion/parser.py` with stubs for BRD (DOCX/PDF/text) and API Excel ingestion.
+- Expected flow: ingest → normalize to schema → store in memory → link to feature graph for impact and drift checks.
+
 ### Requirement & API Schema (for parsers)
 - Requirement: `id`, `title`, `description`, `priority`, `acceptance_criteria`, `feature_area`, `risk`, `compliance_tags` (e.g., PII/RBI), `dependencies`.
 - API: `service`, `path`, `method`, `request_schema`, `response_schema`, `auth`, `rate_limit`, `errors`, `version`, `owner`, `tests`.

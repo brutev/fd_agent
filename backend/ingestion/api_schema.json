@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FD API Contract",
+  "type": "object",
+  "properties": {
+    "service": { "type": "string" },
+    "path": { "type": "string" },
+    "method": { "type": "string" },
+    "version": { "type": "string" },
+    "auth": { "type": "string" },
+    "rate_limit": { "type": "string" },
+    "request_schema": { "type": "object" },
+    "response_schema": { "type": "object" },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "owner": { "type": "string" },
+    "tests": { "type": "array", "items": { "type": "string" } },
+    "source": { "type": "string" },
+    "raw_refs": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["path", "method"],
+  "additionalProperties": true
+}

@@ -86,7 +86,7 @@ class VectorStore:
             metadatas=[{
                 "document_name": document_name,
                 "type": "brd",
-                **metadata
+                **sanitized_metadata
             }],
             ids=[str(uuid.uuid4())]
         )
