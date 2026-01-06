@@ -164,6 +164,18 @@ Analyze the codebase at the specified path (default: current project).
 python run_agent.py --analyze [path]
 ```
 
+### **Build Feature Graph (read-only)**
+Build and persist the Flutter/Python feature graph (no code writes).
+```bash
+python run_agent.py --feature-graph [path]
+```
+
+### **Generate Gap Report (read-only)**
+Compare API contracts vs. backend endpoints and Flutter calls.
+```bash
+python run_agent.py --gap-report [path]
+```
+
 ### **Process Change Request**
 Process a CR by providing a description.
 ```bash

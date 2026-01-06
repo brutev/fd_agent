@@ -314,6 +314,18 @@ async def main():
             cli = AgentCLI()
             await cli.initialize()
             await cli.handle_change_request(' '.join(sys.argv[2:]))
+        elif sys.argv[1] == '--feature-graph':
+            cli = AgentCLI()
+            await cli.initialize()
+            path = sys.argv[2] if len(sys.argv) > 2 else None
+            graph = await cli.orchestrator.build_feature_graph(path or cli.project_path)  # type: ignore
+            print(json.dumps(graph, indent=2))
+        elif sys.argv[1] == '--gap-report':
+            cli = AgentCLI()
+            await cli.initialize()
+            path = sys.argv[2] if len(sys.argv) > 2 else None
+            report = await cli.orchestrator.generate_gap_report(path or cli.project_path)  # type: ignore
+            print(json.dumps(report, indent=2))
         elif sys.argv[1] in ['--help', '-h']:
             print("""
 FD Agent System - Command Line Interface
@@ -326,6 +338,8 @@ Options:
   --interactive    Start interactive CLI mode
   -i               Same as --interactive
   --analyze [path] Analyze a codebase
+    --feature-graph [path] Build and persist feature graph (read-only)
+    --gap-report [path] Generate API/contract gap report (read-only)
   --cr <desc>      Process a change request
   --help, -h       Show this help
 
@@ -333,6 +347,8 @@ Examples:
   python run_agent.py --demo
   python run_agent.py --interactive
   python run_agent.py --analyze /path/to/project
+    python run_agent.py --feature-graph /path/to/project
+    python run_agent.py --gap-report /path/to/project
   python run_agent.py --cr "Add UPI AutoPay feature"
 """)
         else:

@@ -7,7 +7,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from config import settings
-from api.routes import auth, accounts, transactions, kyc, loans
+from api.routes import auth, accounts, transactions, kyc, loans, agent
 from api.middleware.rate_limit import RateLimitMiddleware
 from api.middleware.auth import AuthMiddleware
 from memory.vector_store import VectorStore
@@ -66,6 +66,7 @@ app.include_router(accounts.router, prefix=settings.API_V1_STR, tags=["accounts"
 app.include_router(transactions.router, prefix=settings.API_V1_STR, tags=["transactions"])
 app.include_router(kyc.router, prefix=settings.API_V1_STR, tags=["kyc"])
 app.include_router(loans.router, prefix=settings.API_V1_STR, tags=["loans"])
+app.include_router(agent.router, prefix=settings.API_V1_STR, tags=["agent"])
 
 @app.get("/")
 async def root():
