@@ -10,6 +10,7 @@ from memory.structured_store import StructuredStore, CodeEntity, Relationship
 from agents.memory_agent import MemoryAgent
 from agents.analyzer_agent import AnalyzerAgent
 from agents.cr_handler_agent import CRHandlerAgent
+from ingestion import parser as ingestion_parser
 
 class AgentOrchestrator:
     """Main orchestrator that coordinates all agents"""
@@ -69,6 +70,38 @@ class AgentOrchestrator:
         
         print(f"Analysis complete: {analysis_summary}")
         return analysis_summary
+
+    async def ingest_brd_documents(self, paths: List[str], feature_area: str = "unspecified") -> Dict[str, Any]:
+        """Ingest BRD/CR documents (DOCX/PDF/TXT) into memory."""
+        await self.initialize()
+
+        all_requirements: List[Dict[str, Any]] = []
+        for path in paths:
+            try:
+                reqs = ingestion_parser.parse_brd_document(path, feature_area=feature_area)
+                all_requirements.extend(reqs)
+            except Exception as exc:
+                print(f"Error ingesting BRD {path}: {exc}")
+
+        if all_requirements:
+            await self.memory_agent.store_requirements(all_requirements)
+
+        return {"ingested": len(all_requirements), "paths": paths}
+
+    async def ingest_api_contracts(self, excel_path: str, sheet: str | int | None = None, column_map: Dict[str, str] | None = None) -> Dict[str, Any]:
+        """Ingest API contracts from Excel into memory."""
+        await self.initialize()
+
+        try:
+            contracts = ingestion_parser.parse_api_excel(excel_path, sheet=sheet, column_map=column_map)
+        except Exception as exc:
+            print(f"Error ingesting API Excel {excel_path}: {exc}")
+            contracts = []
+
+        if contracts:
+            await self.memory_agent.store_api_contracts(contracts)
+
+        return {"ingested": len(contracts), "path": excel_path, "sheet": sheet}
     
     async def handle_change_request(self, cr_description: str, cr_id: Optional[str] = None) -> Dict[str, Any]:
         """Handle a change request"""

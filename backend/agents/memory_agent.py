@@ -2,6 +2,7 @@ import asyncio
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 import json
+from uuid import uuid4
 
 from memory.vector_store import VectorStore
 from memory.structured_store import StructuredStore, CodeEntity, Relationship
@@ -56,6 +57,95 @@ class MemoryAgent:
             description=description,
             affected_entities=affected_entities
         )
+
+    async def store_requirements(self, requirements: List[Dict[str, Any]]):
+        """Store BRD/requirement records into structured and vector stores."""
+
+        for req in requirements:
+            req_id = str(req.get("id") or uuid4())
+            title = req.get("title") or f"Requirement {req_id}"
+            description = (req.get("description") or "").strip()
+
+            entity = CodeEntity(
+                id=f"requirement_{req_id}",
+                type="requirement",
+                name=title,
+                file_path=req.get("source") or "",
+                language="text",
+                metadata={
+                    "priority": req.get("priority"),
+                    "feature_area": req.get("feature_area"),
+                    "acceptance_criteria": req.get("acceptance_criteria", []),
+                    "risks": req.get("risks", []),
+                    "compliance_tags": req.get("compliance_tags", []),
+                    "dependencies": req.get("dependencies", []),
+                    "raw_refs": req.get("raw_refs", [])
+                },
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+            )
+
+            await self.structured_store.add_entity(entity)
+
+            # Add to vector store for semantic search
+            ac_text = "\n".join(req.get("acceptance_criteria", []))
+            risk_text = "\n".join(req.get("risks", []))
+            content = f"Requirement: {title}\nPriority: {req.get('priority')}\nFeature: {req.get('feature_area')}\nDescription: {description}\nAC:\n{ac_text}\nRisks:\n{risk_text}"
+            self.vector_store.add_brd_content(
+                document_name=title,
+                content=content,
+                metadata={"id": req_id, "type": "requirement", **entity.metadata},
+            )
+
+    async def store_api_contracts(self, contracts: List[Dict[str, Any]]):
+        """Store API contract records into structured and vector stores."""
+
+        for contract in contracts:
+            method = str(contract.get("method", "")).upper()
+            path = contract.get("path", "")
+            version = contract.get("version", "")
+            contract_id = contract.get("id") or f"{method}_{path}_{version}" or str(uuid4())
+            title = contract.get("service") or path or "API Contract"
+
+            entity = CodeEntity(
+                id=f"api_contract_{contract_id}",
+                type="api_contract",
+                name=title,
+                file_path=contract.get("source") or "",
+                language="api",
+                metadata={
+                    "method": method,
+                    "path": path,
+                    "version": version,
+                    "auth": contract.get("auth"),
+                    "rate_limit": contract.get("rate_limit"),
+                    "request_schema": contract.get("request_schema", {}),
+                    "response_schema": contract.get("response_schema", {}),
+                    "errors": contract.get("errors", []),
+                    "tests": contract.get("tests", []),
+                    "owner": contract.get("owner"),
+                    "raw_refs": contract.get("raw_refs", []),
+                },
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+            )
+
+            await self.structured_store.add_entity(entity)
+
+            # Add to vector store for semantic search (reuse BRD collection for contracts)
+            content = (
+                f"API: {method} {path} ({version})\n"
+                f"Auth: {contract.get('auth')} Rate: {contract.get('rate_limit')}\n"
+                f"Request: {json.dumps(contract.get('request_schema', {}))}\n"
+                f"Response: {json.dumps(contract.get('response_schema', {}))}\n"
+                f"Errors: {contract.get('errors', [])}\n"
+                f"Tests: {contract.get('tests', [])}"
+            )
+            self.vector_store.add_brd_content(
+                document_name=title,
+                content=content,
+                metadata={"id": contract_id, "type": "api_contract", **entity.metadata},
+            )
     
     async def retrieve_context_for_cr(self, cr_description: str, limit: int = 10) -> Dict[str, Any]:
         """Retrieve relevant context for a change request"""
