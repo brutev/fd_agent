@@ -1,45 +1,57 @@
 # FD Agent System - AI-Powered Change Request Handler
 
-A complete production-ready MVP system for an AI agent that maintains persistent memory across conversations for handling Change Requests (CRs) in a Financial Domain (FD) application.
+A complete production-ready MVP system for an AI agent that **reads your codebase (Flutter + FastAPI), stores a graph of what exists, and plans changes for new requirements without breaking what’s there**.
 
-## At-a-Glance Map
+## What the Agent Actually Does (plain words)
+
+- Scans the code statically (no need to “tap” or run the app) to list screens, blocs, routes, API calls, endpoints, models, and validators.
+- Builds a memory graph (SQLite + Chroma) so it knows what exists and how pieces connect.
+- When you give a new requirement, it checks what’s missing, what conflicts, and suggests changes that fit safely.
+- Produces two core outputs:
+	- **Feature graph**: counts and maps of widgets/blocs/routes/API calls/endpoints/models.
+	- **Gap report**: contracts vs backend vs client API calls, flagging missing or mismatched methods/paths.
+
+## At-a-Glance Mindmap (text version)
 
 ```
-User → Flutter app (mobile/) → FastAPI backend (backend/) → AI agent brain
-				   ↘                ↘
-				   UI calls APIs     Scans code, stores knowledge (SQLite + Chroma)
+[Codebase]
+	|-- mobile/ (Flutter)
+	|     |-- widgets, blocs, routes, API calls
+	|
+	|-- backend/ (FastAPI)
+				|-- endpoints, models, services, validators
+
+[Agent Scanner]
+	|-- parses Flutter + Python
+	|-- extracts structure
+	|-- builds feature graph
+
+[Memory]
+	|-- SQLite (structured facts)
+	|-- Chroma (semantic search)
+
+[Outputs]
+	|-- Feature graph → what exists today
+	|-- Gap report → what’s missing/mismatched
+	|-- CR plan → how a new requirement fits without breakage
 ```
 
 ## Visual Story (Padam Parthu Kadhai Sollu)
 
 ```
-[User]
-	|
-	| taps on screens
-	v
-[Flutter App]
-	|  gathers user intent (login, transfer, KYC)
-	|  calls REST APIs
-	v
-[FastAPI Backend]
-	|  authenticates + validates (IFSC/PAN/Aadhaar/UPI)
-	|  serves business logic (accounts, loans, payments)
-	|  logs and secures
-	v
-[AI Agent Brain]
-	|  watches both codebases (Flutter + Python)
-	|  builds a feature graph (widgets, blocs, endpoints, models)
-	|  compares contracts vs backend vs app calls → gap report
-	|  suggests changes for new CRs
-	v
-[Memory]
-	|  SQLite (structured facts) + Chroma (semantic search)
-	|  keeps history of CRs, APIs, and code links
-	v
-[You]
-	|  ask: "Show me features" → feature graph
-	|  ask: "Find misses" → gap report
-	|  run: CLI or HTTP → JSON answers
+[CODE]  Flutter + FastAPI
+	 |
+	 |  (static scan)
+	 v
+[AGENT] Extracts widgets/blocs/routes/endpoints/models
+	 |
+	 |  (stores)
+	 v
+[MEMORY] SQLite + Chroma knowledge graph
+	 |
+	 |  (answers)
+	 v
+[YOU] Ask: feature graph? gap report? new CR plan?
 ```
 
 ## How It Feels to Use
