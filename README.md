@@ -2,6 +2,52 @@
 
 A complete production-ready MVP system for an AI agent that maintains persistent memory across conversations for handling Change Requests (CRs) in a Financial Domain (FD) application.
 
+## At-a-Glance Map
+
+```
+User → Flutter app (mobile/) → FastAPI backend (backend/) → AI agent brain
+				   ↘                ↘
+				   UI calls APIs     Scans code, stores knowledge (SQLite + Chroma)
+```
+
+## Visual Story (Padam Parthu Kadhai Sollu)
+
+```
+[User]
+	|
+	| taps on screens
+	v
+[Flutter App]
+	|  gathers user intent (login, transfer, KYC)
+	|  calls REST APIs
+	v
+[FastAPI Backend]
+	|  authenticates + validates (IFSC/PAN/Aadhaar/UPI)
+	|  serves business logic (accounts, loans, payments)
+	|  logs and secures
+	v
+[AI Agent Brain]
+	|  watches both codebases (Flutter + Python)
+	|  builds a feature graph (widgets, blocs, endpoints, models)
+	|  compares contracts vs backend vs app calls → gap report
+	|  suggests changes for new CRs
+	v
+[Memory]
+	|  SQLite (structured facts) + Chroma (semantic search)
+	|  keeps history of CRs, APIs, and code links
+	v
+[You]
+	|  ask: "Show me features" → feature graph
+	|  ask: "Find misses" → gap report
+	|  run: CLI or HTTP → JSON answers
+```
+
+## How It Feels to Use
+
+- Tap in the mobile app → API call hits FastAPI → agent understands screens, APIs, and data models.
+- Ask for a feature graph → agent returns counts of widgets/blocs/endpoints/models.
+- Ask for a gap report → agent flags missing or mismatched APIs between docs, backend, and Flutter.
+
 ## Architecture
 
 - **Frontend**: Flutter (Android + iOS)
