@@ -1,6 +1,6 @@
 """KYC verification routes"""
 from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime, date
 from enum import Enum
@@ -23,7 +23,8 @@ class AadhaarVerifyRequest(BaseModel):
     name: str
     dob: date
     
-    @validator('aadhaar_number')
+    @field_validator('aadhaar_number')
+    @classmethod
     def validate_aadhaar(cls, v):
         if not AadhaarValidator.validate(v):
             raise ValueError('Invalid Aadhaar number')
@@ -35,7 +36,8 @@ class PANVerifyRequest(BaseModel):
     name: str
     dob: date
     
-    @validator('pan_number')
+    @field_validator('pan_number')
+    @classmethod
     def validate_pan(cls, v):
         if not PANValidator.validate(v):
             raise ValueError('Invalid PAN number')

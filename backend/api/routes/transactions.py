@@ -1,6 +1,6 @@
 """Transaction routes for NEFT, RTGS, IMPS, UPI"""
 from fastapi import APIRouter, HTTPException, Depends, status
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -27,7 +27,8 @@ class NEFTRequest(BaseModel):
     beneficiary_name: str
     remarks: Optional[str] = None
     
-    @validator('ifsc_code')
+    @field_validator('ifsc_code')
+    @classmethod
     def validate_ifsc(cls, v):
         if not IFSCValidator.validate(v):
             raise ValueError('Invalid IFSC code')
@@ -58,7 +59,8 @@ class UPIRequest(BaseModel):
     amount: float = Field(..., gt=0, le=100000)
     remarks: Optional[str] = None
     
-    @validator('upi_id')
+    @field_validator('upi_id')
+    @classmethod
     def validate_upi(cls, v):
         if not UPIValidator.validate(v):
             raise ValueError('Invalid UPI ID')
